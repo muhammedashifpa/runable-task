@@ -1,9 +1,9 @@
-// import { lockedType } from "@/components/editor-components/editor-preview";
-import { lockedType } from "@/components/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, RefObject } from "react";
 
-export function useElementTracker<T extends HTMLDivElement>(
-  ref: React.RefObject<T>,
+import { lockedType } from "@/components/types";
+
+export function useElementTracker<T extends HTMLElement>(
+  ref: RefObject<HTMLDivElement | null>,
   editableMode: boolean,
   setActiveElement: (el: HTMLElement | null) => void
 ) {
@@ -21,15 +21,15 @@ export function useElementTracker<T extends HTMLDivElement>(
 
       const el = e.target as HTMLElement;
       setActiveElement(el);
-      const rect = structuredClone(el.getBoundingClientRect());
+      // const rect = structuredClone(el.getBoundingClientRect());
 
-      setLocked({
-        top: rect.top + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-        height: rect.height,
-        tagName: el.tagName.toLowerCase(),
-      });
+      // setLocked({
+      //   top: rect.top + window.scrollY,
+      //   left: rect.left + window.scrollX,
+      //   width: rect.width,
+      //   height: rect.height,
+      //   tagName: el.tagName.toLowerCase(),
+      // });
     };
 
     const handleMouseOver = (e: MouseEvent) => {

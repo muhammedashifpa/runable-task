@@ -59,7 +59,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { activeElement, editableMode } = useEditor();
+  const { activeElement, editableMode, elementType } = useEditor();
   if (!editableMode) {
     return (
       <Sidebar {...props}>
@@ -90,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
           <div className="flex  gap-0.5 leading-none">
             <span className="font-medium text-xl bg-sky-100 text-sky-600 px-3 py-1 rounded">
-              {activeElement && activeElement?.tagName.toLowerCase()}
+              {elementType}
             </span>
           </div>
         </div>

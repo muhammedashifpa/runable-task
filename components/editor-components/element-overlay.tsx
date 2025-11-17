@@ -6,13 +6,15 @@ export function ElementOverlay({
   editableMode,
   setActiveElement,
   userAppAreaRef,
+  locked,
 }: {
   editableMode: boolean;
   setActiveElement: (el: HTMLElement | null) => void;
-  userAppAreaRef?: React.RefObject<HTMLDivElement> | null;
+  userAppAreaRef: React.RefObject<HTMLDivElement | null>;
+  locked: lockedType | null;
 }) {
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const { liveSelected, locked } = useElementTracker(
+  const { liveSelected } = useElementTracker(
     userAppAreaRef,
     editableMode,
     setActiveElement
@@ -38,13 +40,12 @@ export function ElementOverlay({
   const lockedOverlay = locked ? (
     <div
       data-dev-overlay
-      className="fixed border border-sky-400 pointer-events-none select-none"
+      className="fixed border border-sky-400 pointer-events-none select-none z-2000"
       style={{
         top: locked.top - window.scrollY,
         left: locked.left - window.scrollX,
         width: locked.width,
         height: locked.height,
-        zIndex: 9999,
       }}
     >
       <span className="absolute -top-5 left-0 bg-sky-100 text-sky-600 px-1 rounded text-xs">
@@ -54,13 +55,12 @@ export function ElementOverlay({
   ) : null;
   const liveOverlay = liveSelected ? (
     <div
-      className="fixed border-2 border-sky-400 pointer-events-none select-none z-9998"
+      className="fixed border-2 border-sky-400 pointer-events-none select-none z-2000"
       style={{
         top: rect.top,
         left: rect.left,
         width: rect.width,
         height: rect.height,
-        zIndex: 9999,
       }}
     >
       <span className="absolute -top-5 left-0 bg-sky-100 text-sky-600 px-1 rounded text-xs">

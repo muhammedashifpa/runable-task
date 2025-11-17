@@ -1,37 +1,69 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import { ElementType, getElementType } from "@/lib/editor/elements";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { lockedType } from "../types";
 
 interface EditorContextType {
-  selectedId: string | null;
-  setSelectedId: (id: string | null) => void;
   editableMode: boolean;
-  toggleEditableMode: () => void;
   activeElement: HTMLElement | null;
+  elementType: ElementType;
+  locked: lockedType | null;
+  toggleEditableMode: () => void;
   setActiveElement: (element: HTMLElement | null) => void;
+  updateBoundingClients: () => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editableMode, setEditableMode] = useState(true);
-
   const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
+  const [elementType, setElementType] = useState<ElementType>("unknown");
+  const [locked, setLocked] = useState<lockedType | null>(null);
 
+  console.log(elementType, "elementType in provider");
+
+  const resetProvider = () => {
+    setActiveElement(null);
+    setElementType("unknown");
+  };
   const toggleEditableMode = () => {
     setEditableMode((prev) => !prev);
-    setActiveElement(null);
+    resetProvider();
   };
+  const updateBoundingClients = () => {
+    if (activeElement) {
+      const rect = structuredClone(activeElement.getBoundingClientRect());
+      setLocked({
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+        height: rect.height,
+        tagName: activeElement.tagName.toLowerCase(),
+      });
+    }
+  };
+  useEffect(() => {
+    const updateElementType = () => {
+      if (activeElement) {
+        const type = getElementType(activeElement);
+        setElementType(type);
+      }
+      updateBoundingClients();
+    };
+    updateElementType();
+  }, [activeElement]);
   return (
     <EditorContext.Provider
       value={{
-        selectedId,
-        setSelectedId,
         editableMode,
-        toggleEditableMode,
         activeElement,
+        elementType,
+        locked,
         setActiveElement,
+        toggleEditableMode,
+        updateBoundingClients,
       }}
     >
       {children}

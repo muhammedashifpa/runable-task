@@ -20,9 +20,11 @@ export function SignupForm({
         <CardContent className=" p-0 ">
           <form className="p-6 md:p-8">
             <FieldGroup>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Create your account</h1>
-                <p className="text-muted-foreground text-sm text-balance">
+              <div className="">
+                <h1 className="text-2xl font-bold text-center mb-2 italic">
+                  Create your account
+                </h1>
+                <p className="text-muted-foreground text-sm text-balance text-center">
                   Enter your email below to create your account
                 </p>
               </div>
