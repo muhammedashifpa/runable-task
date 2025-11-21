@@ -63,7 +63,7 @@ export default function Header() {
           variant="ghost"
           aria-label="Submit"
           onClick={resetToOriginalComponent}
-          disabled={isResetting}
+          disabled={isResetting || !editableMode}
         >
           {isResetting ? (
             <>

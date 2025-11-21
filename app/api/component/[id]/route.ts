@@ -9,7 +9,6 @@ export async function GET(
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  console.log("Fetching component with id:", context);
 
   try {
     const filePath = path.join(process.cwd(), "data", `${id}.txt`);

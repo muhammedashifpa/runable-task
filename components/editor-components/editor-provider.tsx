@@ -3,6 +3,7 @@
 import { ElementType, getElementType } from "@/lib/editor/elements";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -48,19 +49,18 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     useState<EditorContextType["Component"]>("loading");
   const [componentId, setComponentId] = useState<string>("hero");
   const [editableMode, setEditableMode] = useState(true);
-
   const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
   const [elementType, setElementType] = useState<ElementType>("unknown");
   const [lockedBoundingClients, setLockedBoundingClients] =
     useState<lockedType | null>(null);
   const [isResetting, setIsResetting] = useState<boolean>(false);
-
   const [saveState, setSaveState] = useState<EditorContextType["saveState"]>({
     dirty: false,
     saving: false,
     error: null,
     success: false,
   });
+
   const { loadComponent, saveComponent, resetComponent } =
     useComponentApi(componentId);
   const userAppAreaRef = useRef<HTMLDivElement>(null);
@@ -82,7 +82,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     resetProvider();
   };
   // Update bounding clients of the active element
-  const updateBoundingClients = () => {
+  const updateBoundingClients = useCallback(() => {
     if (activeElement) {
       const rect = structuredClone(activeElement.getBoundingClientRect());
       setLockedBoundingClients({
@@ -93,7 +93,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         tagName: activeElement.tagName.toLowerCase(),
       });
     }
-  };
+  }, [activeElement]);
 
   // Save component to backend
   const saveComponentHandler = async () => {
@@ -249,15 +249,15 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Update element type and bounding clients when active element changes
-    const updateElTypeAndBoudingClients = () => {
+    const updateElTypeAndBoundingClients = () => {
       if (activeElement) {
         const type = getElementType(activeElement);
         setElementType(type);
       }
       updateBoundingClients();
     };
-    updateElTypeAndBoudingClients();
-  }, [activeElement]);
+    updateElTypeAndBoundingClients();
+  }, [activeElement, updateBoundingClients]);
 
   // Load component on mount
   useEffect(() => {
@@ -305,6 +305,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     }
 
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <EditorContext.Provider

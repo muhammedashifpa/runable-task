@@ -27,32 +27,33 @@ interface TypographyEditControllerProps {
   activeElement: HTMLElement | null;
 }
 
-const FONT_WEIGHT_MAP: Record<string, string> = {
-  thin: "font-thin",
-  extralight: "font-extralight",
-  light: "font-light",
-  normal: "font-normal",
-  medium: "font-medium",
-  semibold: "font-semibold",
-  bold: "font-bold",
-  extrabold: "font-extrabold",
-  black: "font-black",
-};
-const FONT_SIZE_LABELS: Record<string, string> = {
-  "text-xs": "Xs",
-  "text-sm": "Sm",
-  "text-base": "Base",
-  "text-lg": "Lg",
-  "text-xl": "Xl",
-  "text-2xl": "2xl",
-  "text-3xl": "3xl",
-  "text-4xl": "4xl",
-  "text-5xl": "5xl",
-  "text-6xl": "6xl",
-  "text-7xl": "7xl",
-  "text-8xl": "8xl",
-  "text-9xl": "9xl",
-};
+export const FONT_WEIGHT_OPTIONS: { label: string; value: string }[] = [
+  { label: "Thin", value: "font-thin" },
+  { label: "Extra Light", value: "font-extralight" },
+  { label: "Light", value: "font-light" },
+  { label: "Normal", value: "font-normal" },
+  { label: "Medium", value: "font-medium" },
+  { label: "Semi Bold", value: "font-semibold" },
+  { label: "Bold", value: "font-bold" },
+  { label: "Extra Bold", value: "font-extrabold" },
+  { label: "Black", value: "font-black" },
+];
+
+export const FONT_SIZE_OPTIONS: { label: string; value: string }[] = [
+  { label: "Xs", value: "text-xs" },
+  { label: "Sm", value: "text-sm" },
+  { label: "Base", value: "text-base" },
+  { label: "Lg", value: "text-lg" },
+  { label: "Xl", value: "text-xl" },
+  { label: "2xl", value: "text-2xl" },
+  { label: "3xl", value: "text-3xl" },
+  { label: "4xl", value: "text-4xl" },
+  { label: "5xl", value: "text-5xl" },
+  { label: "6xl", value: "text-6xl" },
+  { label: "7xl", value: "text-7xl" },
+  { label: "8xl", value: "text-8xl" },
+  { label: "9xl", value: "text-9xl" },
+];
 
 const COLORS: { label: string; value: string }[] = [
   { label: "Default", value: "text-inherit" },
@@ -112,7 +113,7 @@ export function PropertiesEditController({
     <div className="flex items-center gap-2">
       <Label>Font size</Label>
       <Select value={currentFontSize} onValueChange={(v) => setFontSize(v)}>
-        <SelectTrigger className="w-[160px]">
+        <SelectTrigger className="w-40">
           <SelectValue placeholder="Font Size" />
         </SelectTrigger>
 
@@ -120,7 +121,7 @@ export function PropertiesEditController({
           <SelectGroup>
             <SelectLabel>Font Size</SelectLabel>
 
-            {Object.entries(FONT_SIZE_LABELS).map(([value, label]) => (
+            {FONT_SIZE_OPTIONS.map(({ value, label }) => (
               <SelectItem key={value} value={value}>
                 {label}
               </SelectItem>
@@ -140,15 +141,11 @@ export function PropertiesEditController({
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Font Weight</SelectLabel>
-            <SelectItem value="font-thin">Thin</SelectItem>
-            <SelectItem value="font-extralight">Extra Light</SelectItem>
-            <SelectItem value="font-light">Light</SelectItem>
-            <SelectItem value="font-normal">Normal</SelectItem>
-            <SelectItem value="font-medium">Medium</SelectItem>
-            <SelectItem value="font-semibold">Semi Bold</SelectItem>
-            <SelectItem value="font-bold">Bold</SelectItem>
-            <SelectItem value="font-extrabold">Extra Bold</SelectItem>
-            <SelectItem value="font-black">Black</SelectItem>
+            {FONT_WEIGHT_OPTIONS.map(({ value, label }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>

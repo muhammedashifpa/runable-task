@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { useEditor } from "./editor-provider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
