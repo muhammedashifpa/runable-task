@@ -13,10 +13,15 @@ const TYPO_CLASSES = {
     /^text-(?:[a-z]+(?:-[a-z]+)?-\d{1,3}|black|white|transparent|current)(?:\/\d{1,3})?$/,
 };
 
-export function useTypography(el: HTMLElement | null) {
+export function useTypography() {
   const [classes, setClasses] = useState<string[]>([]);
   const [textClasses, setTextClasses] = useState<string[]>([]);
-  const { updateBoundingClients, elementType } = useEditor();
+  const {
+    updateBoundingClients,
+    elementType,
+    activeElement: el,
+    setSaveState,
+  } = useEditor();
 
   // Extract all classes when element changes
   useEffect(() => {
@@ -69,6 +74,7 @@ export function useTypography(el: HTMLElement | null) {
       return [...filtered, newClass].sort((a, b) => a.localeCompare(b));
     });
     updateBoundingClients();
+    setSaveState((prev) => ({ ...prev, dirty: true }));
   }
 
   const currentWeight = useMemo(() => {

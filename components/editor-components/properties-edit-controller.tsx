@@ -105,7 +105,7 @@ export function PropertiesEditController({
     currentFontColor,
     showTextAlignControls,
     updateTypography,
-  } = useTypography(activeElement);
+  } = useTypography();
 
   return (
     // const {typographySettings, setTypographySettings} = useTypographySettings();

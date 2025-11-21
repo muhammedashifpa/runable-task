@@ -11,6 +11,7 @@ import React, {
 import { lockedType } from "../types";
 import { serializeRootToString } from "@/lib/editor/serializeDomToString";
 import { compileJsxToComponent } from "@/lib/editor/serializeStringToJsx";
+import { toast } from "sonner";
 
 interface EditorContextType {
   Component: React.ComponentType | "loading" | "error";
@@ -22,7 +23,16 @@ interface EditorContextType {
   setActiveElement: (element: HTMLElement | null) => void;
   updateBoundingClients: () => void;
   saveComponent: () => void;
+  setSaveState: React.Dispatch<
+    React.SetStateAction<EditorContextType["saveState"]>
+  >;
   userAppAreaRef: React.RefObject<HTMLDivElement | null>;
+  saveState: {
+    dirty: boolean;
+    saving: boolean;
+    error: string | null;
+    success: boolean;
+  };
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -37,6 +47,13 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [elementType, setElementType] = useState<ElementType>("unknown");
   const [lockedBoundingClients, setLockedBoundingClients] =
     useState<lockedType | null>(null);
+
+  const [saveState, setSaveState] = useState<EditorContextType["saveState"]>({
+    dirty: false,
+    saving: false,
+    error: null,
+    success: false,
+  });
 
   const userAppAreaRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +82,12 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   };
   const saveComponent = async () => {
     if (!userAppAreaRef.current) return;
+    setSaveState((s) => ({
+      ...s,
+      saving: true,
+      error: null,
+      success: false,
+    }));
     const appArea = userAppAreaRef.current;
     const serialized = serializeRootToString(appArea);
     const res = await fetch(`/api/component/${componentId}`, {
@@ -75,9 +98,23 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ code: serialized }),
     });
     if (!res.ok) {
+      setSaveState((s) => ({
+        ...s,
+        saving: false,
+        error: "Failed to save",
+        success: false,
+      }));
+      toast.error("Error saving component");
       throw new Error("Failed to update component");
     }
     const data = await res.json();
+    setSaveState({
+      dirty: false,
+      saving: false,
+      error: null,
+      success: true,
+    });
+    toast.success("Component saved successfully!");
     return data;
   };
 
@@ -147,6 +184,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         activeElement,
         elementType,
         lockedBoundingClients,
+        saveState,
+        setSaveState,
         userAppAreaRef,
         setActiveElement,
         toggleEditableMode,
