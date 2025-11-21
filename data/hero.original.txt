@@ -1,4 +1,4 @@
-<div className="[&_*]:cursor-crosshair">
+
     <div className="bg-white py-24">
       <div className="mx-auto max-w-7xl px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
@@ -70,4 +70,3 @@
         </div>
       </div>
     </div>
-  </div>

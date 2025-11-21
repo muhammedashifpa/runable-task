@@ -139,7 +139,7 @@ export function PropertiesEditController({
 
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>Weight</SelectLabel>
+            <SelectLabel>Font Weight</SelectLabel>
             <SelectItem value="font-thin">Thin</SelectItem>
             <SelectItem value="font-extralight">Extra Light</SelectItem>
             <SelectItem value="font-light">Light</SelectItem>

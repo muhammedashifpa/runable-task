@@ -12,6 +12,10 @@ import { lockedType } from "../types";
 import { serializeRootToString } from "@/lib/editor/serializeDomToString";
 import { compileJsxToComponent } from "@/lib/editor/serializeStringToJsx";
 import { toast } from "sonner";
+import {
+  LoadComponentResponse,
+  useComponentApi,
+} from "@/hooks/useComponentApi";
 
 interface EditorContextType {
   Component: React.ComponentType | "loading" | "error";
@@ -19,13 +23,15 @@ interface EditorContextType {
   activeElement: HTMLElement | null;
   elementType: ElementType;
   lockedBoundingClients: lockedType | null;
+  isResetting: boolean;
   toggleEditableMode: () => void;
   setActiveElement: (element: HTMLElement | null) => void;
   updateBoundingClients: () => void;
-  saveComponent: () => void;
+  saveComponentHandler: () => void;
   setSaveState: React.Dispatch<
     React.SetStateAction<EditorContextType["saveState"]>
   >;
+  resetToOriginalComponent: () => Promise<void>;
   userAppAreaRef: React.RefObject<HTMLDivElement | null>;
   saveState: {
     dirty: boolean;
@@ -47,6 +53,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [elementType, setElementType] = useState<ElementType>("unknown");
   const [lockedBoundingClients, setLockedBoundingClients] =
     useState<lockedType | null>(null);
+  const [isResetting, setIsResetting] = useState<boolean>(false);
 
   const [saveState, setSaveState] = useState<EditorContextType["saveState"]>({
     dirty: false,
@@ -54,13 +61,20 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     error: null,
     success: false,
   });
-
+  const { loadComponent, saveComponent, resetComponent } =
+    useComponentApi(componentId);
   const userAppAreaRef = useRef<HTMLDivElement>(null);
 
   const resetProvider = () => {
     setActiveElement(null);
     setElementType("unknown");
     setLockedBoundingClients(null);
+    setSaveState({
+      dirty: false,
+      saving: false,
+      error: null,
+      success: false,
+    });
   };
 
   const toggleEditableMode = () => {
@@ -80,43 +94,158 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       });
     }
   };
-  const saveComponent = async () => {
-    if (!userAppAreaRef.current) return;
-    setSaveState((s) => ({
-      ...s,
-      saving: true,
-      error: null,
-      success: false,
-    }));
-    const appArea = userAppAreaRef.current;
-    const serialized = serializeRootToString(appArea);
-    const res = await fetch(`/api/component/${componentId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code: serialized }),
-    });
-    if (!res.ok) {
+
+  // Save component to backend
+  const saveComponentHandler = async () => {
+    if (!userAppAreaRef.current) {
+      setSaveState((s) => ({
+        ...s,
+        error: "Editor area not found",
+        saving: false,
+        success: false,
+      }));
+      toast.error("Editor not found");
+      return;
+    }
+
+    try {
+      // Begin saving
+      setSaveState((s) => ({
+        ...s,
+        saving: true,
+        error: null,
+        success: false,
+      }));
+
+      const appArea = userAppAreaRef.current;
+
+      // Serialize UI → JSX string
+      let serialized = "";
+      try {
+        serialized = serializeRootToString(appArea);
+        if (!serialized || typeof serialized !== "string") {
+          throw new Error("Serialization failed");
+        }
+      } catch (err: unknown) {
+        setSaveState((s) => ({
+          ...s,
+          saving: false,
+          error: "Failed to serialize component",
+          success: false,
+        }));
+        toast.error("Failed to serialize component");
+        return;
+      }
+
+      // Send save request
+      let res: Response;
+      try {
+        res = await saveComponent(serialized);
+      } catch (networkError) {
+        setSaveState((s) => ({
+          ...s,
+          saving: false,
+          error: "Network error while saving",
+          success: false,
+        }));
+        toast.error("Network error while saving");
+        return;
+      }
+
+      // API returned error status
+      if (!res.ok) {
+        let errMsg = "Failed to save component";
+
+        try {
+          const errJSON = await res.json();
+          errMsg = errJSON?.error || errMsg;
+        } catch {
+          /* JSON parse failed — ignore */
+        }
+
+        setSaveState((s) => ({
+          ...s,
+          saving: false,
+          error: errMsg,
+          success: false,
+        }));
+
+        toast.error(errMsg);
+        return;
+      }
+
+      // Parse response JSON safely
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        setSaveState((s) => ({
+          ...s,
+          saving: false,
+          error: "Invalid server response",
+          success: false,
+        }));
+        toast.error("Invalid server response");
+        return;
+      }
+
+      // Save was successful
+      setSaveState({
+        dirty: false,
+        saving: false,
+        error: null,
+        success: true,
+      });
+
+      toast.success("Component saved successfully!");
+      return data;
+    } catch (err: unknown) {
+      // Handle absolutely any unexpected failure
+      console.error("Unexpected save error:", err);
+
       setSaveState((s) => ({
         ...s,
         saving: false,
-        error: "Failed to save",
+        error: "Unexpected error occurred",
         success: false,
       }));
-      toast.error("Error saving component");
-      throw new Error("Failed to update component");
+
+      toast.error("Unexpected error occurred");
     }
-    const data = await res.json();
-    setSaveState({
-      dirty: false,
-      saving: false,
-      error: null,
-      success: true,
-    });
-    toast.success("Component saved successfully!");
-    return data;
   };
+
+  async function resetToOriginalComponent() {
+    setIsResetting(true);
+    try {
+      const res = await resetComponent();
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Restore failed");
+      }
+
+      const data = await res.json();
+
+      toast.success("Component restored to original!");
+
+      // Recompile JSX → Component
+      const Comp = compileJsxToComponent(data.code);
+
+      // Update Editor State
+      setComponent(() => Comp);
+      resetProvider();
+
+      return data;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Reset failed";
+      setComponent("error");
+      toast.error(message);
+
+      return null;
+    } finally {
+      setIsResetting(false);
+    }
+  }
 
   useEffect(() => {
     // Update element type and bounding clients when active element changes
@@ -130,12 +259,13 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     updateElTypeAndBoudingClients();
   }, [activeElement]);
 
+  // Load component on mount
   useEffect(() => {
     async function load() {
       try {
         setComponent("loading");
 
-        const res = await fetch(`/api/component/hero`);
+        const res = await loadComponent();
 
         if (!res.ok) {
           console.error("Fetch failed:", res.status);
@@ -143,7 +273,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const data = await res.json();
+        const data = (await res.json()) as LoadComponentResponse;
 
         if (!data?.code || typeof data.code !== "string") {
           console.error("Invalid or missing code");
@@ -185,12 +315,14 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         elementType,
         lockedBoundingClients,
         saveState,
+        isResetting,
         setSaveState,
         userAppAreaRef,
         setActiveElement,
         toggleEditableMode,
         updateBoundingClients,
-        saveComponent,
+        saveComponentHandler,
+        resetToOriginalComponent,
       }}
     >
       {children}

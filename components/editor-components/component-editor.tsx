@@ -1,5 +1,4 @@
 "use client";
-import { useEffect } from "react";
 import { ElementOverlay } from "./element-overlay";
 import { useEditor } from "./editor-provider";
 
@@ -16,13 +15,24 @@ export default function EditorPreview({
     setActiveElement,
     lockedBoundingClients,
     userAppAreaRef,
+    isResetting,
+    Component,
   } = useEditor();
+  const mountOverlay =
+    editableMode &&
+    Component !== "error" &&
+    Component !== "loading" &&
+    !isResetting;
   return (
     <>
-      <div className="[&_*]:cursor-crosshair" ref={userAppAreaRef}>
+      <div
+        data-editor-root
+        className={mountOverlay ? "**:cursor-crosshair" : undefined}
+        ref={userAppAreaRef}
+      >
         {component}
       </div>
-      {editableMode && (
+      {mountOverlay && (
         <ElementOverlay
           setActiveElement={setActiveElement}
           userAppAreaRef={userAppAreaRef}

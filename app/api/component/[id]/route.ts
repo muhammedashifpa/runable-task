@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 // import { getComponent, updateComponent } from "@/lib/db";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-type Params = { params: { id: string } };
 
 // GET /api/component/:id → fetch JSX
 export async function GET(
