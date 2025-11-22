@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import { readFile, writeFile, access } from "fs/promises";
-import { constants } from "fs";
+import { redis } from "@/lib/redis";
 
 export async function POST(
   req: NextRequest,
@@ -9,7 +7,7 @@ export async function POST(
 ) {
   const { id } = await context.params;
 
-  // 1. Validate ID
+  // Validate ID
   if (!id) {
     return NextResponse.json(
       { error: "Component ID is required." },
@@ -17,38 +15,31 @@ export async function POST(
     );
   }
 
-  const dataDir = path.join(process.cwd(), "data");
-  const mainFile = path.join(dataDir, `${id}.txt`);
-  const originalFile = path.join(dataDir, `${id}.original.txt`);
+  const MAIN_KEY = `component:${id}`;
+  const ORIGINAL_KEY = `component:${id}:original`;
 
   try {
-    // 2. Check main file exists
-    await access(mainFile, constants.F_OK);
-  } catch {
-    return NextResponse.json(
-      { error: `Component '${id}' does not exist.` },
-      { status: 404 }
-    );
-  }
+    // Ensure main component exists
+    const mainExists = await redis.exists(MAIN_KEY);
+    if (!mainExists) {
+      return NextResponse.json(
+        { error: `Component '${id}' does not exist.` },
+        { status: 404 }
+      );
+    }
 
-  try {
-    // 3. Check original file exists
-    await access(originalFile, constants.F_OK);
-  } catch {
-    return NextResponse.json(
-      { error: `Original version for '${id}' not found.` },
-      { status: 404 }
-    );
-  }
+    // Ensure original component exists
+    const originalCode = await redis.get<string>(ORIGINAL_KEY);
+    if (!originalCode) {
+      return NextResponse.json(
+        { error: `Original version for '${id}' not found.` },
+        { status: 404 }
+      );
+    }
 
-  try {
-    // 4. Read from original
-    const originalCode = await readFile(originalFile, "utf8");
+    // Restore original → main
+    await redis.set(MAIN_KEY, originalCode);
 
-    // 5. Overwrite main file
-    await writeFile(mainFile, originalCode, { encoding: "utf8" });
-
-    // 6. Return response
     return NextResponse.json({
       id,
       message: `Component '${id}' successfully reset to original.`,

@@ -1,22 +1,30 @@
+import { redis } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
-// import { getComponent, updateComponent } from "@/lib/db";
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
 
+export const POST = async () => {
+  // Fetch data from Redis
+  const result = await redis.get("item");
+
+  // Return the result in the response
+  return new NextResponse(JSON.stringify({ result }), { status: 200 });
+};
 // GET /api/component/:id → fetch JSX
 export async function GET(
   req: NextRequest,
   context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-
+  const MAIN_KEY = `component:${id}`;
   try {
-    const filePath = path.join(process.cwd(), "data", `${id}.txt`);
-    const content = await readFile(filePath, "utf8");
+    const result = await redis.get(MAIN_KEY);
+
+    if (!result) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
 
     return NextResponse.json({
       id: id,
-      code: content,
+      code: result,
     });
   } catch (err) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -34,12 +42,9 @@ export async function PUT(
   if (!code || typeof code !== "string") {
     return NextResponse.json({ error: "Missing JSX code" }, { status: 400 });
   }
-
+  const MAIN_KEY = `component:${id}`;
   try {
-    const filePath = path.join(process.cwd(), "data", `${id}.txt`);
-
-    // Write updated content
-    await writeFile(filePath, code, "utf8");
+    await redis.set(MAIN_KEY, code);
 
     return NextResponse.json({
       message: "Component updated successfully",
