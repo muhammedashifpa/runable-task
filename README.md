@@ -121,19 +121,25 @@ hero.original.txt
 
 <h3>1. Load Component</h3>
 
-`GET /api/component/:id`
+```
+GET /api/component/:id
+```
 
 Loads the component’s .txt file → compiles → mounts into editor.
 
 <h3>2. Save Component</h3>
 
-`PUT /api/component/:id`
+```
+PUT /api/component/:id
+```
 
 Frontend serializes DOM → JSX → sends to backend.
 
 <h3>3. Reset Component</h3>
 
-`POST /api/component/reset/:id`
+```
+POST /api/component/reset/:id
+```
 
 Copies id.original.txt → id.txt and returns fresh JSX.
 
@@ -158,36 +164,28 @@ Copies id.original.txt → id.txt and returns fresh JSX.
 
 <h3>Install dependencies</h3>
 
-`pnpm install`
+```
+pnpm install
+```
 
 <h3>Run dev server</h3>
 
-`pnpm dev`
+```
+pnpm dev
+```
 
 <h3>Build for production</h3>
 
-`pnpm build`
+```
+pnpm build
+```
 
 ⸻
 
 <h2>🧪 API Testing With Curl</h2>
 
 <h3>Restore a component:</h3>
-
-`curl -X POST http://localhost:3000/api/component/reset/hero`
-
-⸻
-
-<h2>🚧 Roadmap</h2>
-• Add Upstash Redis or Vercel Blob storage
-• Multi-component editing support
-• Component version history
-• Drag & drop layout editing
-• Cloud sync
-• Reusable style presets
-
-⸻
-
 ```
-
+curl -X POST http://localhost:3000/api/component/reset/hero`
 ```
+⸻
