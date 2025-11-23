@@ -186,6 +186,6 @@ pnpm build
 
 <h3>Restore a component:</h3>
 ```
-curl -X POST http://localhost:3000/api/component/reset/hero`
+curl -X POST http://localhost:3000/api/component/reset/hero
 ```
 ⸻

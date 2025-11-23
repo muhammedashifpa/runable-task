@@ -1,6 +1,6 @@
 import { useState, useEffect, RefObject } from "react";
 
-export function useElementTracker<T extends HTMLElement>(
+export function useElementTracker(
   userAppAreaRef: RefObject<HTMLDivElement | null>,
   editableMode: boolean,
   setActiveElement: (el: HTMLElement | null) => void
@@ -63,7 +63,7 @@ export function useElementTracker<T extends HTMLElement>(
       node.removeEventListener("mouseover", handleMouseOver);
       node.removeEventListener("mouseout", handleMouseOut);
     };
-  }, [editableMode, userAppAreaRef]);
+  }, [editableMode, userAppAreaRef, setActiveElement]);
 
   return { liveSelected };
 }
