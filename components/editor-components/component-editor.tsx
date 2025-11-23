@@ -1,11 +1,11 @@
 "use client";
 import { ElementOverlay } from "./element-overlay";
-import { useEditor } from "./editor-provider";
+import { useEditor } from "../../context/editor-provider";
 
-// EditorPreview wraps the user application area
+// ComponentEditor wraps the user application area
 // and conditionally renders the ElementOverlay in editable mode
 // and Place Selected element overlay
-export default function EditorPreview({
+export default function ComponentEditor({
   userComponent,
 }: {
   userComponent: React.ReactNode;

@@ -1,4 +1,4 @@
-import { useEditor } from "@/components/editor-components/editor-provider";
+import { useEditor } from "@/context/editor-provider";
 import { TYPO_CLASSES } from "@/lib/editor/utils";
 import { useState, useEffect, useMemo } from "react";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor } from "./editor-provider";
+import { useEditor } from "../../context/editor-provider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";

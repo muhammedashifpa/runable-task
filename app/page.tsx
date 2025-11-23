@@ -1,5 +1,5 @@
 import Header from "@/components/editor-components/header";
-import { EditorProvider } from "@/components/editor-components/editor-provider";
+import { EditorProvider } from "@/context/editor-provider";
 import ComponentEditor from "@/components/editor-components/component-editor";
 import UserComponentLoader from "@/components/user-components-loader";
 

@@ -1,13 +1,6 @@
 import { redis } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async () => {
-  // Fetch data from Redis
-  const result = await redis.get("item");
-
-  // Return the result in the response
-  return new NextResponse(JSON.stringify({ result }), { status: 200 });
-};
 // GET /api/component/:id → fetch JSX
 export async function GET(
   req: NextRequest,

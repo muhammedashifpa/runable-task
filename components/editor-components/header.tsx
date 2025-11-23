@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { PropertiesEditController } from "@/components/editor-components/properties-edit-controller";
 import { EditModeToggle } from "@/components/editor-components/edit-mode-toggle";
 
-import { useEditor } from "./editor-provider";
+import { useEditor } from "../../context/editor-provider";
 import { Alert, AlertTitle } from "../ui/alert";
 
 export default function Header() {
@@ -61,7 +61,7 @@ export default function Header() {
       )}
       <div className="flex items-center gap-4">
         <Button
-          className="flex items-center gap-"
+          className="flex items-center gap-2"
           variant="ghost"
           aria-label="Submit"
           onClick={resetToOriginalComponent}

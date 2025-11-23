@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { lockedType } from "../types";
+import { lockedType } from "../components/types";
 import { serializeRootToString } from "@/lib/editor/serializeDomToString";
 import { compileJsxToComponent } from "@/lib/editor/serializeStringToJsx";
 import { toast } from "sonner";

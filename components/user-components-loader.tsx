@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { useEditor } from "./editor-components/editor-provider";
+import { useEditor } from "../context/editor-provider";
 
 export default function UserComponent() {
   const { Component } = useEditor();
