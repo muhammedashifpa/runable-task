@@ -96,7 +96,7 @@ Fallback modes: "loading" and "error" ensure graceful UI states.
 ⸻
 
 <h2>📁 Project Structure</h2>
-```
+```bash
 /app
   /api
     /component/[id]
